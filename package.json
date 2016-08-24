@@ -1,0 +1,34 @@
+{
+  "name": "app-bridge",
+  "main": "index.js",
+  "version": "0.0.6",
+  "description": "Create a bridge.",
+  "license": "MIT",
+  "repository": "ajoslin/app-bridge",
+  "author": {
+    "name": "Andrew Joslin",
+    "email": "andrewtjoslin@gmail.com",
+    "url": "ajoslin.com"
+  },
+  "scripts": {
+    "test": "standard && tape test.js"
+  },
+  "keywords": [
+    "app",
+    "bridge"
+  ],
+  "devDependencies": {
+    "standard": "^7.0.0",
+    "tape": "^4.0.0"
+  },
+  "files": [
+    "*.js"
+  ],
+  "dependencies": {
+    "assert": "~1.4.1",
+    "cast-array": "~1.0.1",
+    "global": "~4.3.0",
+    "run-series": "~1.1.4",
+    "xtend": "~4.0.1"
+  }
+}
