@@ -32,7 +32,10 @@ const bridge = Bridge({
 })
 
 function mountChildApp (params) {
-  bridge.send('loadChildApp', {body: params}, function (error, element) {
+  bridge.send({
+    channel: 'loadChildApp',
+    payload: params
+  }, function (error, element) {
     parentElement.appendChild(element)
   })
 }
