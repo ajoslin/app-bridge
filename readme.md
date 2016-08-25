@@ -60,7 +60,7 @@ bridge.listen('loadChildApp', function (data, respond) {
 
 ##### options
 
-An objeect with a property `channels`, which is also an object, with the following properties:
+An object with a property `channels`, which is also an object, with the following properties:
 
 - `request: Object`
   - `validate: Function(data) => Error?` - if validate returns or throws an error, the request fails.
@@ -99,7 +99,7 @@ A function that will be called with `(data, respond)` when a message is sent on 
 
 Respond should be called with `(error, responseData)`.
 
-### `require('app-bridge/singleton')
+### `require('app-bridge/singleton')`
 
 This is the same as requiring the main file, except it creates or returns a singleton stored on the window.
 
