@@ -1,7 +1,7 @@
 {
   "name": "app-bridge",
   "main": "index.js",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "Create a bridge.",
   "license": "MIT",
   "repository": "ajoslin/app-bridge",
