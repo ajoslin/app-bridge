@@ -2,11 +2,12 @@
 
 const test = require('tape')
 const assert = require('assert')
+const Bluebird = require('bluebird')
 const Bridge = require('./')
 
 test('basic', function (t) {
   const bridge = Bridge({
-    channels: {
+    methods: {
       powerOfThree: {
         request: {
           validate: (data) => assert.equal(data, 3)
@@ -19,14 +20,11 @@ test('basic', function (t) {
   })
 
   t.plan(2)
-  bridge.listen('powerOfThree', function (data, respond) {
+  bridge.listen(bridge.methods.powerOfThree, function (data, respond) {
     respond(null, Math.pow(data, 3))
   })
 
-  bridge.send({
-    channel: 'powerOfThree',
-    payload: 3
-  }, function onResponse (error, data) {
+  bridge.methods.powerOfThree(3, function onResponse (error, data) {
     t.ifError(error)
     t.equal(data, 27)
   })
@@ -34,7 +32,7 @@ test('basic', function (t) {
 
 test('input errors', function (t) {
   const bridge = Bridge({
-    channels: {
+    methods: {
       bar: {}
     }
   })
@@ -43,15 +41,15 @@ test('input errors', function (t) {
 
   // Event does not exist
   t.throws(function () {
-    bridge.send({channel: 'foo'}, function () {})
+    bridge.methods.foo()
   })
 
-  // No listeners
-  bridge.send({channel: 'bar'}, function (error) {
+  // No listen(bridge.methods.s
+  bridge.methods.bar(function (error) {
     t.ok(error, 'no listeners error')
 
-    bridge.listen('bar', (data, respond) => respond(null, 5))
-    bridge.send({channel: 'bar'}, function (error, data) {
+    bridge.listen(bridge.methods.bar, (data, respond) => respond(null, 5))
+    bridge.methods.bar(function (error) {
       t.ifError(error, 'no error for sending now because a listener is here')
     })
   })
@@ -59,7 +57,7 @@ test('input errors', function (t) {
 
 test('validators', function (t) {
   const bridge = Bridge({
-    channels: {
+    methods: {
       price: {
         request: {
           validate: (data) => assert.equal(data.product, 'tom ford')
@@ -73,22 +71,16 @@ test('validators', function (t) {
 
   t.plan(4)
 
-  bridge.listen('price', function (data, respond) {
+  bridge.listen(bridge.methods.price, function (data, respond) {
     respond(null, {price: 401})
   })
 
-  bridge.send({
-    channel: 'price',
-    payload: {product: 'tom ford2'}
-  }, function (error) {
+  bridge.methods.price({product: 'tom ford2'}, function (error) {
     t.pass(error)
     t.ok(error.message.indexOf('tom ford') !== -1, 'should be request validation error')
   })
 
-  bridge.send({
-    channel: 'price',
-    payload: {product: 'tom ford'}
-  }, function (error) {
+  bridge.methods.price({product: 'tom ford'}, function (error) {
     t.pass(error)
     t.ok(error.message.indexOf('400') !== -1, 'should be response validation error')
   })
@@ -96,21 +88,21 @@ test('validators', function (t) {
 
 test('listen twice and unlisten', function (t) {
   const bridge = Bridge({
-    channels: {
+    methods: {
       foo: {}
     }
   })
 
-  const unlisten = bridge.listen('foo', function (data, respond) {
+  const unlisten = bridge.listen(bridge.methods.foo, function (data, respond) {
     respond(null, 'bar')
   })
 
   t.throws(function () {
-    bridge.listen('foo')
+    bridge.listen(bridge.methods.foo)
   })
 
   unlisten()
-  bridge.listen('foo', function () {})
+  bridge.listen(bridge.methods.foo, function () {})
 
   t.end()
 })
@@ -120,7 +112,7 @@ test('middleware', function (t) {
   let after = false
 
   const bridge = Bridge({
-    channels: {
+    methods: {
       foo: {
         request: {
           middleware: [(next) => {
@@ -143,14 +135,14 @@ test('middleware', function (t) {
   t.equal(before, false)
   t.equal(after, false)
 
-  bridge.listen('foo', (data, respond) => {
+  bridge.listen(bridge.methods.foo, (data, respond) => {
     t.equal(before, true, 'request middleware ran')
     t.equal(after, false, 'respond middleware didnt')
 
     respond()
   })
 
-  bridge.send({channel: 'foo'}, () => {
+  bridge.methods.foo(() => {
     t.equal(before, true, 'request middleware ran')
     t.equal(after, true, 'respond middleware ran')
   })
@@ -158,7 +150,7 @@ test('middleware', function (t) {
 
 test('parameter validation', function (t) {
   t.throws(() => Bridge({
-    channels: {
+    methods: {
       foo: {
         request: {
           unknown: 1
@@ -168,4 +160,25 @@ test('parameter validation', function (t) {
   }))
 
   t.end()
+})
+
+test('promisifyAll works', function (t) {
+  const bridge = Bridge({
+    methods: {
+      cat: {}
+    }
+  })
+
+  bridge.listen(bridge.methods.cat, function (data, respond) {
+    respond(null, 'cat' + data)
+  })
+
+  Bluebird.promisifyAll(bridge.methods)
+
+  bridge.methods.catAsync(2)
+    .then(function (response) {
+      t.equal(response, 'cat2')
+      t.end()
+    })
+    .catch(t.fail)
 })

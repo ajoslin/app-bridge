@@ -19,7 +19,7 @@ const Bridge = require('app-bridge/singleton')
 const loadScriptOnce = require('load-script-once')
 
 const bridge = Bridge({
-  channels: {
+  methods: {
     loadChildApp: {
       request: {
         middleware: [(next) => loadScriptOnce('/child-app.js', next)]
@@ -32,10 +32,7 @@ const bridge = Bridge({
 })
 
 function mountChildApp (params) {
-  bridge.send({
-    channel: 'loadChildApp',
-    payload: params
-  }, function (error, element) {
+  bridge.methods.loadChildApp(params, function (error, element) {
     parentElement.appendChild(element)
   })
 }
@@ -46,7 +43,7 @@ function mountChildApp (params) {
 ```js
 const bridge = require('app-bridge/singleton')()
 
-bridge.listen('loadChildApp', function (data, respond) {
+bridge.listen(bridge.methods.loadChildApp, function (data, respond) {
   const element = document.createElement('child-app')
   element.innerHTML = JSON.stringify(data)
 
@@ -63,7 +60,7 @@ bridge.listen('loadChildApp', function (data, respond) {
 
 ##### options
 
-An object with a property `channels`, which is also an object, with the following properties:
+An object with a property `methods`, which is also an object, with the following properties:
 
 - `request: Object`
   - `validate: Function(data) => Error?` - if validate returns or throws an error, the request fails.
@@ -73,14 +70,13 @@ An object with a property `channels`, which is also an object, with the followin
   - `middleware: Array<Function(callback)>` - an array of asynchronous functions to run in order before sending the response.
 
 
-#### `bridge.send(options, callback)`
+#### `bridge.methods.{methodName}([payload], callback)`
 
-##### options
+Methods will be defined under the object `bridge.methods` matching the name of every key you passed into `options.methods`.
 
-An object with the following properties:
+##### payload
 
-- `channel: String` - One of the channels defined in the Bridge constructor.
-- `payload: Any` - The payload to send to any listeners.
+Optional data to pass to this method's listener.
 
 ##### callback
 
@@ -90,11 +86,11 @@ It is called with an error if an error occurs in any validate or middleware func
 
 Otherwise, it is called with `data` that the listener responded with.
 
-#### `bridge.listen(channel, callback)`
+#### `bridge.listen(method, callback)`
 
-##### channel
+##### method
 
-The string ID of one of the channels defined in the constructor
+A reference to one of the methods under `bridge.methods`.
 
 ##### listener
 
