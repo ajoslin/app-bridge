@@ -2,7 +2,6 @@ var assert = require('assert')
 var assign = require('xtend/mutable')
 var castArray = require('cast-array')
 var series = require('run-series')
-var partial = require('ap').partial
 var Symbol = require('symbol-key')
 
 function noop () {}
@@ -28,7 +27,9 @@ function Bridge (options) {
       return listen(method[privateId], listener)
     },
     methods: Object.keys(methods).reduce(function (acc, methodId) {
-      acc[methodId] = partial(send, methods[methodId])
+      acc[methodId] = function appBridgeWrap (payload, callback) {
+        send(methods[methodId], payload, callback)
+      }
       acc[methodId][privateId] = methodId
 
       return acc
@@ -36,7 +37,7 @@ function Bridge (options) {
   }
 
   function send (method, payload, callback) {
-    if (arguments.length === 2) {
+    if (typeof payload === 'function') {
       callback = payload
       payload = undefined
     }
