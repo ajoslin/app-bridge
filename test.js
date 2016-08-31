@@ -45,11 +45,11 @@ test('input errors', function (t) {
   })
 
   // No listen(bridge.methods.s
-  bridge.methods.bar(function (error) {
+  bridge.methods.bar(null, function (error) {
     t.ok(error, 'no listeners error')
 
     bridge.listen(bridge.methods.bar, (data, respond) => respond(null, 5))
-    bridge.methods.bar(function (error) {
+    bridge.methods.bar(null, function (error) {
       t.ifError(error, 'no error for sending now because a listener is here')
     })
   })
@@ -142,7 +142,7 @@ test('middleware', function (t) {
     respond()
   })
 
-  bridge.methods.foo(() => {
+  bridge.methods.foo(null, () => {
     t.equal(before, true, 'request middleware ran')
     t.equal(after, true, 'respond middleware ran')
   })
@@ -181,4 +181,24 @@ test('promisifyAll works', function (t) {
       t.end()
     })
     .catch(t.fail)
+})
+
+test('function payload works', function (t) {
+  function payloadFn () {}
+
+  const bridge = Bridge({
+    methods: {
+      foo: {}
+    }
+  })
+
+  t.plan(2)
+
+  bridge.listen(bridge.methods.foo, function (data) {
+    t.equal(data, payloadFn)
+  })
+
+  // Works with and without third arg
+  bridge.methods.foo(payloadFn)
+  bridge.methods.foo(payloadFn, function responseFn () {})
 })

@@ -37,10 +37,6 @@ function Bridge (options) {
   }
 
   function send (method, payload, callback) {
-    if (typeof payload === 'function' && !callback) {
-      callback = payload
-      payload = undefined
-    }
     callback = callback || noop
 
     var validateError = validate(payload, method.request.validate)

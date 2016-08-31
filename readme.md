@@ -70,13 +70,13 @@ An object with a property `methods`, which is also an object, with the following
   - `middleware: Array<Function(callback)>` - an array of asynchronous functions to run in order before sending the response.
 
 
-#### `bridge.methods.{methodName}([payload], callback)`
+#### `bridge.methods.{methodName}(payload, callback)`
 
 Methods will be defined under the object `bridge.methods` matching the name of every key you passed into `options.methods`.
 
-##### payload
+##### payload: any
 
-Optional data to pass to this method's listener.
+Data to pass to this method's listener.
 
 ##### callback
 
