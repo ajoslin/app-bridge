@@ -1,7 +1,7 @@
-const window = require('global/window')
-const Bridge = require('./')
+var window = require('global/window')
+var Bridge = require('./')
 
-const KEY = '__APP_BRIDGE_v1__'
+var KEY = '__APP_BRIDGE_v1__'
 
 module.exports = function singletonBridge (data) {
   if (!window[KEY]) {
