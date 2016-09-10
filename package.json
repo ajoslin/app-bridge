@@ -1,7 +1,7 @@
 {
   "name": "app-bridge",
   "main": "index.js",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A bridge between parent and asynchronously loaded child applications",
   "license": "MIT",
   "repository": "ajoslin/app-bridge",
